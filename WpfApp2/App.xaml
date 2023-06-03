@@ -1,0 +1,166 @@
+﻿<Application x:Class="WpfApp2.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:WpfApp2"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <FontFamily x:Key="IconFont">
+                pack://application:,,,/WpfApp2;component/#iconfont
+            </FontFamily>
+            <local:ObjectsToIndexesConverter x:Key="ObjectsToIndexesConverter" />
+
+            <Style x:Key="Carousel.RepeatButtonStyle"
+                   TargetType="RepeatButton">
+                <Setter Property="Width" Value="40" />
+                <Setter Property="Height" Value="40" />
+                <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+                <Setter Property="FontSize" Value="25" />
+                <Setter Property="Foreground" Value="Gray" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RepeatButton">
+                            <Border x:Name="RootBorder"
+                                    Background="#38FFFFFF"
+                                    BorderThickness="0"
+                                    CornerRadius="5">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="RootBorder" Property="Background" Value="#D7DDDDDD" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="Carousel.IndexRadiuButton"
+                   TargetType="RadioButton">
+                <Setter Property="Width" Value="18" />
+                <Setter Property="Height" Value="18" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Ellipse x:Name="Ellipse"
+                                     Width="10"
+                                     Height="{Binding Path=Width, RelativeSource={RelativeSource Mode=Self}}"
+                                     Fill="#B0FCFCFC"
+                                     Opacity="0.7" />
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Ellipse" Property="Fill" Value="White" />
+                                    <Setter TargetName="Ellipse" Property="Width" Value="15" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style TargetType="{x:Type local:CarouselItem}">
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Width" Value="{Binding Path=ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:Carousel}}" />
+                <Setter Property="Height" Value="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=local:Carousel}}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type local:CarouselItem}">
+                            <Grid>
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                  Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style TargetType="{x:Type local:Carousel}">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden" />
+                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type local:Carousel}">
+                            <Grid>
+                                <Grid x:Name="RootGrid">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <RepeatButton x:Name="PART_PrevRepeatButton"
+                                                  Grid.Column="0"
+                                                  Panel.ZIndex="99"
+                                                  Command="{x:Static local:Carousel.PrevCommand}"
+                                                  Content="&#xe61f;"
+                                                  Style="{StaticResource Carousel.RepeatButtonStyle}" />
+                                    <ScrollViewer x:Name="PART_ScrollViewer"
+                                                  Grid.Column="0"
+                                                  Grid.ColumnSpan="3"
+                                                  Panel.ZIndex="0"
+                                                  local:ScrollViewerAttacher.HorizontalOffset="0"
+                                                  CanContentScroll="False">
+                                        <StackPanel IsItemsHost="True"
+                                                    Orientation="Horizontal" />
+                                    </ScrollViewer>
+
+                                    <RepeatButton x:Name="PART_NextRepeatButton"
+                                                  Grid.Column="2"
+                                                  Panel.ZIndex="99"
+                                                  Command="{x:Static local:Carousel.NextCommand}"
+                                                  Content="&#xe620;"
+                                                  Style="{StaticResource Carousel.RepeatButtonStyle}" />
+                                    <ListBox x:Name="PART_IndexListBox"
+                                             Grid.Column="0"
+                                             Grid.ColumnSpan="3"
+                                             Margin="0,0,0,20"
+                                             VerticalAlignment="Bottom"
+                                             Panel.ZIndex="99"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             ItemsSource="{Binding Path=ItemsSource, Converter={StaticResource ObjectsToIndexesConverter}, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                                             SelectedIndex="{Binding Path=SelectedIndex, Mode=TwoWay, RelativeSource={RelativeSource Mode=TemplatedParent}}">
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="ListBoxItem">
+                                                            <RadioButton GroupName="Index"
+                                                                         IsChecked="{Binding Path=IsSelected, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}}"
+                                                                         Style="{StaticResource Carousel.IndexRadiuButton}" />
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel HorizontalAlignment="Center"
+                                                            Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                    </ListBox>
+                                </Grid>
+
+                                <ContentPresenter Margin="30"
+                                                  HorizontalAlignment="Right"
+                                                  VerticalAlignment="Top"
+                                                  Content="{TemplateBinding ExtendObject}" />
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
